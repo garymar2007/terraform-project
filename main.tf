@@ -1,6 +1,5 @@
 provider "aws" {
   region = "us-east-1"
-
 }
 
 # Create a new EC2 instance
@@ -75,10 +74,16 @@ resource "aws_route_table" "practice-project-rt" {
   }
 }
 
+variable "subnet_prefix" {
+  description = "cidr block for the subnet"
+#  default =
+#  type = String
+}
+
 #4.	Create a subnet
 resource "aws_subnet" "subnet-1" {
   vpc_id            = aws_vpc.practice-project-vpc.id
-  cidr_block        = "10.0.1.0/24"
+  cidr_block        = var.subnet_prefix
   availability_zone = "us-east-1a"
   tags              = {
     Name = "practice-project-subnet"
