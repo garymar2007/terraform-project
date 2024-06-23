@@ -77,18 +77,31 @@ resource "aws_route_table" "practice-project-rt" {
 variable "subnet_prefix" {
   description = "cidr block for the subnet"
 #  default =
-#  type = String
+  type = list(object({
+    cidr_block = string
+    name = string
+  }))
 }
 
 #4.	Create a subnet
 resource "aws_subnet" "subnet-1" {
   vpc_id            = aws_vpc.practice-project-vpc.id
-  cidr_block        = var.subnet_prefix
+  cidr_block        = var.subnet_prefix[0].cidr_block
   availability_zone = "us-east-1a"
   tags              = {
-    Name = "practice-project-subnet"
+    Name = var.subnet_prefix[0].name
   }
 }
+
+resource "aws_subnet" "subnet-2" {
+  vpc_id            = aws_vpc.practice-project-vpc.id
+  cidr_block        = var.subnet_prefix[1].cidr_block
+  availability_zone = "us-east-1a"
+  tags              = {
+    Name = var.subnet_prefix[1].name
+  }
+}
+
 #5.	Associate subnet with Route table
 resource "aws_route_table_association" "a" {
   subnet_id      = aws_subnet.subnet-1.id
@@ -134,7 +147,7 @@ resource "aws_security_group" "practice-project-sg" {
 #7.	Create a network interface with an ip in the subnet that was created in step 4
 resource "aws_network_interface" "practice-project-ni" {
   subnet_id       = aws_subnet.subnet-1.id
-  private_ips     = ["10.0.1.50"]
+  private_ips     = ["10.0.66.50"]
   security_groups = [aws_security_group.practice-project-sg.id]
 }
 
@@ -142,7 +155,7 @@ resource "aws_network_interface" "practice-project-ni" {
 resource "aws_eip" "practice-project-eip" {
   domain      = "vpc"
   network_interface = aws_network_interface.practice-project-ni.id
-  associate_with_private_ip = "10.0.1.50"
+  associate_with_private_ip = "10.0.66.50"
   depends_on = [aws_internet_gateway.gw, aws_instance.practice-project-web-server]
 }
 
